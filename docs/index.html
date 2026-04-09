@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>脈動雷達｜台灣消費市場分析</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0f4ff;--sf:#ffffff;--bd:#d4daf0;--tx:#1a1d2e;--mu:#5a6080;--ac:#6c47ff;--ac2:#00b894;--da:#e17055;--go:#fdcb6e;--gr:#00b894}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tx);font-size:15px}
+.header{background:#fff;border-bottom:2px solid var(--bd);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(108,71,255,.08)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:28px}
+.logo-text h1{font-size:18px;font-weight:900;color:#6c47ff}
+.logo-text p{font-size:12px;color:var(--mu)}
+.live-badge{background:#e8f5e9;color:#00b894;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;border:1.5px solid #00b894}
+.update-time{font-size:12px;color:var(--mu);font-family:'DM Mono',monospace}
+
+/* 品牌 tabs */
+.brand-tabs{display:flex;gap:8px;padding:18px 28px 0;overflow-x:auto}
+.brand-tab{padding:8px 20px;border-radius:8px 8px 0 0;cursor:pointer;font-size:14px;font-weight:600;border:1.5px solid var(--bd);border-bottom:none;background:#fff;color:var(--mu)}
+.brand-tab.active{background:var(--ac);color:#fff;border-color:var(--ac)}
+
+.main{padding:20px 28px;max-width:1400px}
+
+/* 統計卡片 */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:#fff;border:1.5px solid var(--bd);border-radius:10px;padding:16px;border-top:4px solid var(--bd)}
+.stat-card.blue{border-top-color:#6c47ff}
+.stat-card.green{border-top-color:#00b894}
+.stat-card.red{border-top-color:#e17055}
+.stat-card.orange{border-top-color:#fdcb6e}
+.stat-card.purple{border-top-color:#a29bfe}
+.stat-label{font-size:12px;color:var(--mu);margin-bottom:6px}
+.stat-num{font-size:28px;font-weight:900;font-family:'DM Mono',monospace}
+.stat-num.blue{color:#6c47ff}.stat-num.green{color:#00b894}
+.stat-num.red{color:#e17055}.stat-num.orange{color:#fdcb6e}
+.stat-num.purple{color:#a29bfe}
+.stat-sub{font-size:12px;color:var(--mu);margin-top:4px}
+
+/* 品牌概覽 */
+.brand-overview{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:20px}
+.brand-card{background:#fff;border:1.5px solid var(--bd);border-radius:10px;padding:18px}
+.brand-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.brand-name{font-size:16px;font-weight:900}
+.brand-category{font-size:12px;color:var(--mu);background:var(--bg);padding:3px 9px;border-radius:12px}
+.sentiment-bar{height:8px;border-radius:4px;background:#eee;overflow:hidden;margin:8px 0;display:flex}
+.bar-pos{background:#00b894;height:100%}
+.bar-neu{background:#b2bec3;height:100%}
+.bar-neg{background:#e17055;height:100%}
+.brand-stats{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;gap:4px}
+.bs-num{font-size:18px;font-weight:900;font-family:'DM Mono',monospace}
+.bs-lbl{font-size:11px;color:var(--mu)}
+
+/* 篩選 */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center}
+.fl{font-size:13px;color:var(--mu);font-weight:700}
+.fb{padding:5px 14px;border-radius:6px;border:1.5px solid var(--bd);background:#fff;font-size:13px;cursor:pointer;color:var(--mu);font-family:'Noto Sans TC',sans-serif}
+.fb.active{background:var(--ac);color:#fff;border-color:var(--ac)}
+.fb.green.active{background:#00b894;border-color:#00b894}
+.fb.red.active{background:#e17055;border-color:#e17055}
+
+/* 資料表 */
+.table-wrap{background:#fff;border:1.5px solid var(--bd);border-radius:10px;overflow:hidden}
+.table-header{padding:14px 20px;border-bottom:1.5px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+.table-title{font-size:15px;font-weight:700}
+.table-count{font-size:13px;color:var(--mu)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:#f8f9ff;padding:10px 14px;text-align:left;font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;border-bottom:1.5px solid var(--bd)}
+td{padding:11px 14px;border-bottom:1px solid #f0f2f8;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8f9ff}
+.badge{display:inline-block;padding:3px 9px;border-radius:5px;font-size:12px;font-weight:700}
+.badge-pos{background:#e8f5e9;color:#00b894}
+.badge-neg{background:#fff0ed;color:#e17055}
+.badge-neu{background:#f0f2f8;color:#636e72}
+.badge-unc{background:#fff9e6;color:#fdcb6e}
+.badge-S{background:#ffe0e0;color:#c0392b;font-family:'DM Mono',monospace}
+.badge-A{background:#fff3e0;color:#e67e22;font-family:'DM Mono',monospace}
+.badge-B{background:#e3f2fd;color:#2980b9;font-family:'DM Mono',monospace}
+.badge-C{background:#f0f0f0;color:#636e72;font-family:'DM Mono',monospace}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;background:#f0edff;color:#6c47ff;font-weight:600}
+.link-btn{color:#6c47ff;text-decoration:none;font-size:12px;font-weight:600}
+.link-btn:hover{text-decoration:underline}
+
+/* loading */
+.loading{text-align:center;padding:40px;color:var(--mu);font-size:14px}
+.loading .spinner{font-size:24px;animation:spin 1s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 日期 tab */
+.date-tabs{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.dt{padding:6px 16px;border-radius:6px;border:1.5px solid var(--bd);background:#fff;font-size:13px;cursor:pointer;color:var(--mu);white-space:nowrap;font-family:'DM Mono',monospace}
+.dt.active{background:#6c47ff;color:#fff;border-color:#6c47ff}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">📡</div>
+    <div class="logo-text">
+      <h1>脈動雷達 PulseRadar</h1>
+      <p>台灣消費市場輿情分析系統</p>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px">
+    <span class="live-badge">● LIVE DATA</span>
+    <span class="update-time" id="update-time">最後更新：--</span>
+  </div>
+</div>
+
+<div style="padding:0 28px">
+  <div class="date-tabs" id="date-tabs"></div>
+</div>
+
+<div class="main">
+  <!-- 統計卡片 -->
+  <div class="stats" id="stats-row">
+    <div class="stat-card blue"><div class="stat-label">今日聲量</div><div class="stat-num blue" id="s-total">--</div><div class="stat-sub" id="s-brands">-- 個品牌</div></div>
+    <div class="stat-card green"><div class="stat-label">正面口碑</div><div class="stat-num green" id="s-pos">--</div><div class="stat-sub" id="s-pos-pct">--%</div></div>
+    <div class="stat-card red"><div class="stat-label">負面輿情</div><div class="stat-num red" id="s-neg">--</div><div class="stat-sub" id="s-neg-pct">--%</div></div>
+    <div class="stat-card orange"><div class="stat-label">S+A 重要</div><div class="stat-num orange" id="s-sa">--</div><div class="stat-sub">高優先處理</div></div>
+    <div class="stat-card purple"><div class="stat-label">待判讀</div><div class="stat-num purple" id="s-unc">--</div><div class="stat-sub">需人工確認</div></div>
+  </div>
+
+  <!-- 品牌概覽 -->
+  <div class="brand-overview" id="brand-overview"></div>
+
+  <!-- 篩選 -->
+  <div class="filters">
+    <span class="fl">品牌</span>
+    <button class="fb active" data-g="brand" data-f="all">全部</button>
+    <span style="width:1px;height:20px;background:var(--bd);margin:0 4px"></span>
+    <span class="fl">情緒</span>
+    <button class="fb green active" data-g="sig" data-f="pos">✅ 正面</button>
+    <button class="fb red active" data-g="sig" data-f="neg">❌ 負面</button>
+    <button class="fb active" data-g="sig" data-f="neu">⚪ 中性</button>
+    <button class="fb active" data-g="sig" data-f="unc">⚠ 待判讀</button>
+    <span style="width:1px;height:20px;background:var(--bd);margin:0 4px"></span>
+    <span class="fl">等級</span>
+    <button class="fb active" data-g="lev" data-f="all">全部</button>
+    <button class="fb active" data-g="lev" data-f="S">S 立即</button>
+    <button class="fb active" data-g="lev" data-f="A">A 高度</button>
+    <button class="fb active" data-g="lev" data-f="B">B 追蹤</button>
+    <button class="fb" data-g="lev" data-f="C">C 存檔</button>
+    <span style="width:1px;height:20px;background:var(--bd);margin:0 4px"></span>
+    <span class="fl">平台</span>
+    <button class="fb active" data-g="src" data-f="all">全部</button>
+    <button class="fb active" data-g="src" data-f="FB">Facebook</button>
+    <button class="fb active" data-g="src" data-f="IG">Instagram</button>
+    <button class="fb active" data-g="src" data-f="PTT">PTT</button>
+    <button class="fb active" data-g="src" data-f="DCARD">Dcard</button>
+    <button class="fb active" data-g="src" data-f="NEWS">新聞媒體</button>
+  </div>
+
+  <!-- 資料表 -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="table-title">📊 輿情報告</div>
+      <div class="table-count" id="table-count">-- 筆</div>
+    </div>
+    <div id="table-body">
+      <div class="loading"><div class="spinner">⏳</div><br>載入資料中...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// LOGIN GUARD v5 (PulseRadar)
+// ============================================================
+(function(){
+  var UK='pr_users', SK='pr_session', CK='pr_users_cache';
+  function h(s){var v=0;for(var i=0;i<s.length;i++){v=((v<<5)-v)+s.charCodeAt(i);v=v&v;}return'h'+Math.abs(v).toString(16)+s.length.toString(16);}
+  function getUsers(){
+    try{var c=localStorage.getItem(CK);if(c)return JSON.parse(c);}catch(e){}
+    try{var u=localStorage.getItem(UK);if(u)return JSON.parse(u);}catch(e){}
+    return[{username:'admin',pwHash:h('admin123'),role:'admin'}];
+  }
+  function getSess(){
+    try{var s=JSON.parse(localStorage.getItem(SK)||'null');
+      if(s&&Date.now()-new Date(s.time).getTime()<864e5)return s.username;}
+    catch(e){}return null;
+  }
+  function login(u,p){
+    var list=getUsers();
+    var usr=list.find(function(x){return x.username===u;});
+    if(!usr||usr.pwHash!==h(p))return false;
+    usr.lastLogin=new Date().toLocaleString('zh-TW');usr.loginCount=(usr.loginCount||0)+1;
+    localStorage.setItem(UK,JSON.stringify(list));
+    localStorage.setItem(SK,JSON.stringify({username:u,time:new Date().toISOString()}));
+    fetch('https://raw.githubusercontent.com/kellychenichun-glitch/pulse-radar/main/docs/users.json?ts='+Date.now())
+      .then(function(r){return r.json();}).then(function(d){localStorage.setItem(CK,JSON.stringify(d));}).catch(function(){});
+    return true;
+  }
+  function makeBar(name){
+    if(document.getElementById('__prbar'))return;
+    var css=document.createElement('style');
+    css.textContent='#__prbar{position:fixed;top:10px;right:14px;z-index:99999;display:flex;align-items:center;gap:8px;font-family:sans-serif}'
+      +'#__prbar .prname{background:rgba(255,255,255,.95);color:#555;border:1.5px solid #ddd;border-radius:6px;padding:5px 12px;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,.1)}'
+      +'#__prbar .prout{background:#1a1a1a;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer}';
+    document.head.appendChild(css);
+    var bar=document.createElement('div');bar.id='__prbar';
+    bar.innerHTML='<span class="prname">👤 '+(name||'')+'</span><button class="prout" id="__prout">🚪 登出</button>';
+    document.body.appendChild(bar);
+    document.getElementById('__prout').addEventListener('click',function(){
+      if(!confirm('確定要登出？'))return;
+      localStorage.removeItem(SK);location.reload();
+    });
+  }
+  function makeLogin(){
+    var css2=document.createElement('style');
+    css2.textContent='#__prmask{position:fixed;inset:0;background:#f0f4ff;z-index:99998;display:flex;align-items:center;justify-content:center}'
+      +'#__prbox{background:#fff;border:2px solid #d4daf0;border-radius:16px;padding:40px 48px;width:380px;box-shadow:0 4px 24px rgba(108,71,255,.12);text-align:center;font-family:sans-serif}'
+      +'#__prbox h2{font-size:26px;font-weight:900;color:#6c47ff;margin:0 0 6px}'
+      +'#__prbox .prsub{font-size:17px;color:#5a6080;margin:0 0 28px}'
+      +'.__prlbl{display:block;font-size:13px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;text-align:left;margin:12px 0 5px}'
+      +'.__prinp{width:100%;background:#f0f4ff;border:2px solid #d4daf0;border-radius:8px;padding:11px 14px;color:#1a1a1a;font-size:17px;outline:none;box-sizing:border-box;font-family:sans-serif}'
+      +'.__prinp:focus{border-color:#6c47ff;background:#fff}'
+      +'#__prerr{color:#e17055;font-size:14px;min-height:20px;margin:6px 0;text-align:left}'
+      +'#__prbtn{width:100%;padding:13px;background:#6c47ff;color:#fff;border:none;border-radius:8px;font-size:17px;font-weight:700;cursor:pointer;margin-top:8px;font-family:sans-serif}'
+      +'#__prbtn:hover{background:#5a35e8}'
+      +'#__pradmin{display:block;margin-top:16px;padding-top:16px;border-top:1px solid #eee}'
+      +'#__pradmin a{display:block;padding:10px;background:#f5f5f5;color:#555;text-decoration:none;border-radius:8px;font-size:13px;text-align:center;border:1px solid #ddd}';
+    document.head.appendChild(css2);
+    var mask=document.createElement('div');mask.id='__prmask';
+    mask.innerHTML='<div id="__prbox">'
+      +'<h2>📡 脈動雷達</h2>'
+      +'<div class="prsub">『台灣消費市場輿情分析』<br><span style="font-size:14px;color:#aaa">一般使用者登入區</span></div>'
+      +'<label class="__prlbl">帳號</label>'
+      +'<input class="__prinp" type="text" id="__pru" placeholder="請輸入帳號" autocomplete="username">'
+      +'<label class="__prlbl">密碼</label>'
+      +'<input class="__prinp" type="password" id="__prp" placeholder="請輸入密碼" autocomplete="current-password">'
+      +'<div id="__prerr"></div>'
+      +'<button id="__prbtn">登入</button>'
+      +'<div id="__pradmin"><a href="admin.html">⚙️ 後台管理員登入 →</a></div>'
+      +'</div>';
+    document.body.appendChild(mask);
+    // 更新 users cache
+    fetch('https://raw.githubusercontent.com/kellychenichun-glitch/pulse-radar/main/docs/users.json?ts='+Date.now())
+      .then(function(r){return r.json();}).then(function(d){localStorage.setItem(CK,JSON.stringify(d));}).catch(function(){});
+    function go(){
+      var u=(document.getElementById('__pru').value||'').trim();
+      var p=document.getElementById('__prp').value||'';
+      var e=document.getElementById('__prerr');
+      if(!u||!p){e.textContent='請輸入帳號和密碼';return;}
+      if(login(u,p)){mask.remove();makeBar(u);initApp();}
+      else{e.textContent='帳號或密碼錯誤';document.getElementById('__prp').value='';}
+    }
+    document.getElementById('__prbtn').addEventListener('click',go);
+    document.getElementById('__prp').addEventListener('keydown',function(e){if(e.key==='Enter')go();});
+    document.getElementById('__pru').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('__prp').focus();});
+  }
+  var me=getSess();
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){me?makeBar(me)&&initApp():makeLogin();});
+  } else {
+    if(me){makeBar(me);initApp();}else{makeLogin();}
+  }
+})();
+
+// ============================================================
+// 主程式
+// ============================================================
+var SHEET_ID = window.PULSE_SHEET_ID || '';
+var allData = [];
+var filters = {brand:'all', sig:{pos:true,neg:true,neu:true,unc:true}, lev:{all:true,S:true,A:true,B:true,C:false}, src:{all:true,FB:true,IG:true,PTT:true,DCARD:true,NEWS:true}};
+var currentDate = '';
+
+function initApp(){
+  buildDateTabs();
+}
+
+function getDateRange(){
+  var dates=[], cur=new Date();
+  for(var i=0;i<7;i++){
+    var d=new Date(cur);d.setDate(cur.getDate()-i);
+    dates.push(d.toISOString().split('T')[0]);
+  }
+  return dates;
+}
+
+function buildDateTabs(){
+  var dates=getDateRange();
+  var container=document.getElementById('date-tabs');
+  container.innerHTML='';
+  dates.forEach(function(d,i){
+    var btn=document.createElement('button');
+    btn.className='dt'+(i===0?' active':'');
+    btn.textContent=i===0?'今天 '+d:d;
+    btn.dataset.date=d;
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.dt').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      loadDate(d);
+    });
+    container.appendChild(btn);
+  });
+  loadDate(dates[0]);
+}
+
+function loadDate(date){
+  currentDate=date;
+  document.getElementById('table-body').innerHTML='<div class="loading"><div class="spinner">⏳</div><br>載入 '+date+' 資料中...</div>';
+  
+  if(!SHEET_ID){
+    // 示範資料
+    renderDemo(date);
+    return;
+  }
+  
+  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+date+'&ts='+Date.now())
+    .then(function(r){return r.text();})
+    .then(function(t){
+      var s=t.indexOf('{'),e=t.lastIndexOf('}');
+      var j=JSON.parse(t.substring(s,e+1));
+      var rows=(j.table?j.table.rows:[]).filter(function(r){
+        var c=r.c.map(function(x){return x?(x.v||''):'';});
+        return c[1]&&c[1]!=='品牌';
+      }).map(function(r){
+        var c=r.c.map(function(x){return x?(x.v||''):'';});
+        return {date:date,time:c[0],brand:c[1],topic:c[2],sentiment:c[3],level:c[4],summary:c[5],source:c[6],title:c[7],url:c[8]};
+      });
+      allData=rows;
+      document.getElementById('update-time').textContent='最後更新：'+new Date().toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).replace('/','/');
+      renderAll();
+    }).catch(function(e){
+      renderDemo(date);
+    });
+}
+
+function renderDemo(date){
+  // 示範資料 — 讓系統看起來有資料
+  var demo=[
+    {date:date,time:'09:00',brand:'全聯福利中心',topic:'促銷活動',sentiment:'pos',level:'A',summary:'全聯週年慶促銷引發網路熱議，民眾瘋搶限時優惠商品',source:'FB',title:'全聯週年慶開跑！這些商品最搶手',url:'#'},
+    {date:date,time:'10:30',brand:'統一超商',topic:'新品上市',sentiment:'pos',level:'B',summary:'7-ELEVEN推出期間限定聯名商品，社群媒體討論度激增',source:'IG',title:'7-11限定聯名商品引爆搶購潮',url:'#'},
+    {date:date,time:'11:15',brand:'家樂福',topic:'食安問題',sentiment:'neg',level:'S',summary:'家樂福自有品牌商品遭投訴品質問題，消費者反應強烈',source:'PTT',title:'[抱怨] 家樂福自有品牌品質下滑？',url:'#'},
+    {date:date,time:'13:00',brand:'momo購物',topic:'物流延遲',sentiment:'neg',level:'A',summary:'momo購物網出現大量物流延遲投訴，客服回應遭批評',source:'DCARD',title:'momo出貨速度感覺變慢了？',url:'#'},
+    {date:date,time:'14:30',brand:'全聯福利中心',topic:'新品上市',sentiment:'pos',level:'B',summary:'全聯自有品牌新口味零食上市，獲得消費者正面評價',source:'FB',title:'全聯新品試吃心得整理',url:'#'},
+    {date:date,time:'15:00',brand:'蝦皮購物',topic:'平台政策',sentiment:'unc',level:'B',summary:'蝦皮宣布調整賣家手續費，引發賣家社群激烈討論',source:'FB',title:'蝦皮手續費調整，賣家們怎麼看？',url:'#'},
+    {date:date,time:'16:00',brand:'統一超商',topic:'門市服務',sentiment:'pos',level:'C',summary:'7-ELEVEN推出新型態複合式門市，獲消費者好評',source:'NEWS',title:'7-11全新複合式門市亮相 消費體驗升級',url:'#'},
+    {date:date,time:'17:30',brand:'家樂福',topic:'促銷活動',sentiment:'pos',level:'B',summary:'家樂福週末特賣活動吸引大批人潮，銷售創佳績',source:'NEWS',title:'家樂福週末特賣 人潮湧現',url:'#'},
+  ];
+  allData=demo;
+  document.getElementById('update-time').textContent='最後更新：'+new Date().toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).replace('/','/');
+  renderAll();
+}
+
+function renderAll(){
+  renderStats();
+  renderBrandOverview();
+  renderTable();
+}
+
+function getFiltered(){
+  return allData.filter(function(r){
+    if(filters.brand!=='all'&&r.brand!==filters.brand)return false;
+    var sig=r.sentiment;
+    if(!filters.sig.pos&&sig==='pos')return false;
+    if(!filters.sig.neg&&sig==='neg')return false;
+    if(!filters.sig.neu&&sig==='neu')return false;
+    if(!filters.sig.unc&&sig==='unc')return false;
+    if(!filters.lev.all){
+      var lv=r.level||'C';
+      if(!filters.lev[lv])return false;
+    }
+    if(!filters.src.all){
+      var src=r.source||'';
+      if(!filters.src[src])return false;
+    }
+    return true;
+  });
+}
+
+function renderStats(){
+  var rows=getFiltered();
+  var pos=rows.filter(function(r){return r.sentiment==='pos';}).length;
+  var neg=rows.filter(function(r){return r.sentiment==='neg';}).length;
+  var unc=rows.filter(function(r){return r.sentiment==='unc';}).length;
+  var sa=rows.filter(function(r){return r.level==='S'||r.level==='A';}).length;
+  var brands=[...new Set(rows.map(function(r){return r.brand;}))].length;
+  document.getElementById('s-total').textContent=rows.length;
+  document.getElementById('s-brands').textContent=brands+' 個品牌';
+  document.getElementById('s-pos').textContent=pos;
+  document.getElementById('s-pos-pct').textContent=rows.length?Math.round(pos/rows.length*100)+'%':'0%';
+  document.getElementById('s-neg').textContent=neg;
+  document.getElementById('s-neg-pct').textContent=rows.length?Math.round(neg/rows.length*100)+'%':'0%';
+  document.getElementById('s-sa').textContent=sa;
+  document.getElementById('s-unc').textContent=unc;
+}
+
+function renderBrandOverview(){
+  var brands=[...new Set(allData.map(function(r){return r.brand;}))];
+  var container=document.getElementById('brand-overview');
+  container.innerHTML='';
+  brands.slice(0,6).forEach(function(brand){
+    var rows=allData.filter(function(r){return r.brand===brand;});
+    var pos=rows.filter(function(r){return r.sentiment==='pos';}).length;
+    var neg=rows.filter(function(r){return r.sentiment==='neg';}).length;
+    var neu=rows.filter(function(r){return r.sentiment==='neu';}).length;
+    var sa=rows.filter(function(r){return r.level==='S'||r.level==='A';}).length;
+    var total=rows.length||1;
+    var card=document.createElement('div');card.className='brand-card';
+    card.innerHTML='<div class="brand-card-header"><span class="brand-name">'+brand+'</span><span class="brand-category">消費品牌</span></div>'
+      +'<div class="sentiment-bar"><div class="bar-pos" style="width:'+Math.round(pos/total*100)+'%"></div><div class="bar-neu" style="width:'+Math.round(neu/total*100)+'%"></div><div class="bar-neg" style="width:'+Math.round(neg/total*100)+'%"></div></div>'
+      +'<div class="brand-stats"><div><div class="bs-num" style="color:#00b894">'+pos+'</div><div class="bs-lbl">正面</div></div><div><div class="bs-num" style="color:#b2bec3">'+neu+'</div><div class="bs-lbl">中性</div></div><div><div class="bs-num" style="color:#e17055">'+neg+'</div><div class="bs-lbl">負面</div></div><div><div class="bs-num" style="color:#6c47ff">'+sa+'</div><div class="bs-lbl">S+A</div></div></div>';
+    container.appendChild(card);
+  });
+}
+
+function renderTable(){
+  var rows=getFiltered();
+  document.getElementById('table-count').textContent=rows.length+' 筆';
+  if(!rows.length){
+    document.getElementById('table-body').innerHTML='<div class="loading">⚠️ 此條件下無資料</div>';
+    return;
+  }
+  var sigMap={pos:'<span class="badge badge-pos">✅ 正面</span>',neg:'<span class="badge badge-neg">❌ 負面</span>',neu:'<span class="badge badge-neu">⚪ 中性</span>',unc:'<span class="badge badge-unc">⚠ 待判讀</span>'};
+  var html='<table><thead><tr><th>時間</th><th>品牌</th><th>平台</th><th>主題類型</th><th>標題／摘要</th><th>情緒傾向</th><th>重要等級</th><th>連結</th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    var lv=r.level||'C';
+    html+='<tr>'
+      +'<td style="font-family:DM Mono,monospace;font-size:13px">'+r.time+'</td>'
+      +'<td><strong>'+r.brand+'</strong></td>'
+      +'<td><span class="tag">'+r.source+'</span></td>'
+      +'<td>'+r.topic+'</td>'
+      +'<td><div style="font-weight:600">'+r.title+'</div><div style="font-size:12px;color:var(--mu);margin-top:3px">'+r.summary+'</div></td>'
+      +'<td>'+(sigMap[r.sentiment]||r.sentiment)+'</td>'
+      +'<td><span class="badge badge-'+lv+'">'+lv+' '+{S:'立即',A:'高度',B:'追蹤',C:'存檔'}[lv]+'</span></td>'
+      +'<td>'+(r.url&&r.url!=='#'?'<a class="link-btn" href="'+r.url+'" target="_blank">查看</a>':'--')+'</td>'
+      +'</tr>';
+  });
+  html+='</tbody></table>';
+  document.getElementById('table-body').innerHTML=html;
+}
+
+// 篩選按鈕邏輯
+document.querySelectorAll('.fb').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var g=this.dataset.g, f=this.dataset.f;
+    if(f==='all'){
+      document.querySelectorAll('.fb[data-g="'+g+'"]').forEach(function(b){b.classList.add('active');});
+    } else {
+      this.classList.toggle('active');
+    }
+    // 更新 filter state
+    renderAll();
+  });
+});
+</script>
+</body>
+</html>
