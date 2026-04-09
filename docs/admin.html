@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>脈動雷達｜後台管理</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0f4ff;--sf:#ffffff;--sf2:#f5f7ff;--sf3:#eef1ff;--bd:#d4daf0;--tx:#1a1d2e;--mu:#5a6080;--ac:#6c47ff;--da:#e17055;--go:#fdcb6e;--gr:#00b894}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tx);font-size:16px}
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.sidebar{background:var(--sf);border-right:2px solid var(--bd);position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{padding:22px 20px 16px;border-bottom:2px solid var(--bd);background:var(--ac)}
+.logo h1{font-size:17px;font-weight:900;color:#fff}
+.logo h1 span{color:#ffd6ff}
+.logo .ver{font-size:12px;color:rgba(255,255,255,.75);font-family:'DM Mono',monospace;margin-top:3px}
+.ns{padding:10px 0}.nl{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:2px;padding:6px 20px;font-weight:700}
+.ni{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;color:var(--mu);font-size:15px;border-left:3px solid transparent}
+.ni:hover{color:var(--ac);background:var(--sf2)}.ni.active{color:var(--ac);background:var(--sf2);border-left-color:var(--ac);font-weight:700}
+.ic{font-size:15px;width:20px;text-align:center}
+.main{padding:28px 36px 90px;max-width:1000px}
+.ph{margin-bottom:24px}.ph h2{font-size:22px;font-weight:900}.ph p{font-size:14px;color:var(--mu);margin-top:5px}
+.sec{background:var(--sf);border:1.5px solid var(--bd);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.sh{padding:14px 18px;border-bottom:1.5px solid var(--bd);background:var(--sf2)}
+.st{font-size:14px;font-weight:700}.sd{font-size:12px;color:var(--mu);margin-top:2px}
+.sb{padding:20px}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.fg3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld label{font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px}
+.fld input,.fld select,.fld textarea{background:var(--sf2);border:1.5px solid var(--bd);border-radius:7px;padding:8px 12px;color:var(--tx);font-size:15px;font-family:'Noto Sans TC',sans-serif;outline:none;width:100%}
+.fld input:focus,.fld select:focus{border-color:var(--ac);background:#fff}
+.rw{display:flex;align-items:center;gap:10px}.rw input[type=range]{flex:1;accent-color:var(--ac)}
+.rv{font-family:'DM Mono',monospace;font-size:13px;color:var(--ac);min-width:28px;text-align:right;font-weight:700}
+.tr{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1.5px solid var(--sf3)}.tr:last-child{border-bottom:none}
+.tl{font-size:15px;font-weight:500}.ts{font-size:13px;color:var(--mu);margin-top:2px}
+.tog{position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.tgs{position:absolute;cursor:pointer;inset:0;background:var(--bd);border-radius:24px;transition:.2s}
+.tgs:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tog input:checked+.tgs{background:var(--ac)}.tog input:checked+.tgs:before{transform:translateX(18px)}
+.ke{background:var(--sf2);border:1.5px solid var(--bd);border-radius:8px;padding:12px}
+.kl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:30px}
+.kt{display:inline-flex;align-items:center;gap:5px;background:var(--sf);border:1.5px solid var(--bd);border-radius:5px;padding:3px 9px;font-size:13px;font-family:'DM Mono',monospace}
+.kt.pos{border-color:var(--gr);color:var(--gr);background:#e8f5f0}.kt.neg{border-color:var(--da);color:var(--da);background:#fff0ed}.kt.evt{border-color:var(--ac);color:var(--ac);background:#f0edff}
+.kr{cursor:pointer;opacity:.5;font-size:15px}.kr:hover{opacity:1;color:var(--da)}
+.ka{display:flex;gap:8px}
+.ka input{flex:1;background:#fff;border:1.5px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:14px;font-family:'DM Mono',monospace;outline:none;color:var(--tx)}
+.ka input:focus{border-color:var(--ac)}
+.ka button{background:var(--ac);border:none;border-radius:6px;padding:7px 14px;color:#fff;font-size:14px;cursor:pointer;font-weight:700}
+.scp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.scc{background:var(--sf2);border:1.5px solid var(--bd);border-radius:7px;padding:10px;text-align:center}
+.scv{font-size:20px;font-weight:900;font-family:'DM Mono',monospace}
+.scv.S{color:#c0392b}.scv.A{color:#e67e22}.scv.B{color:#2980b9}.scv.C{color:var(--mu)}
+.scr{font-size:12px;color:var(--mu);margin-top:3px;font-family:'DM Mono',monospace}
+.user-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1.5px solid var(--sf3)}.user-row:last-child{border-bottom:none}
+.user-name{flex:1;font-size:15px;font-weight:600}
+.user-role{font-size:13px;color:var(--mu);background:var(--sf2);padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace}
+.log-table{width:100%;border-collapse:collapse;font-size:14px}
+.log-table th{background:var(--sf2);padding:8px 12px;text-align:left;font-size:12px;font-weight:700;color:var(--mu);border-bottom:2px solid var(--bd)}
+.log-table td{padding:9px 12px;border-bottom:1px solid var(--sf3)}
+.log-table tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700;font-family:'DM Mono',monospace}
+.badge-login{background:#e8f0ff;color:var(--ac)}.badge-fail{background:#ffe8e8;color:var(--da)}.badge-save{background:#e8fff5;color:var(--gr)}.badge-user{background:#f5e8ff;color:#9b59b6}
+.ab{position:fixed;bottom:0;right:0;left:240px;background:var(--sf);border-top:2px solid var(--bd);padding:12px 36px;display:flex;justify-content:space-between;align-items:center;z-index:100}
+.ss{font-size:13px;font-family:'DM Mono',monospace;font-weight:500}.ss.ok{color:var(--gr)}.ss.ng{color:var(--go)}
+.br2{display:flex;gap:10px}
+.btn{padding:9px 20px;border-radius:8px;border:none;font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .15s}
+.btn-p{background:var(--ac);color:#fff}.btn-p:hover{background:#5a35e8}
+.btn-s{background:var(--sf2);color:var(--tx);border:1.5px solid var(--bd)}.btn-s:hover{border-color:var(--ac);color:var(--ac)}
+.btn-d{background:#fff0ed;color:var(--da);border:1.5px solid var(--da)}.btn-d:hover{background:var(--da);color:#fff}
+.btn-g{background:#e8fff5;color:var(--gr);border:1.5px solid var(--gr)}.btn-g:hover{background:var(--gr);color:#fff}
+.tst{position:fixed;top:18px;right:20px;background:var(--gr);color:#fff;padding:10px 20px;border-radius:8px;font-weight:700;font-size:15px;transform:translateY(-60px);opacity:0;transition:all .3s;z-index:999}
+.tst.show{transform:none;opacity:1}
+
+/* 登入畫面 */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
+.login-box{background:#fff;border:2px solid var(--bd);border-radius:16px;padding:40px 48px;width:400px;box-shadow:0 4px 24px rgba(108,71,255,.12)}
+.login-box h2{font-size:22px;font-weight:900;color:var(--ac);margin-bottom:4px}
+.login-box p{font-size:14px;color:var(--mu);margin-bottom:28px}
+.login-field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.login-field label{font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px}
+.login-field input{background:var(--sf2);border:2px solid var(--bd);border-radius:8px;padding:10px 14px;color:var(--tx);font-size:15px;outline:none}
+.login-field input:focus{border-color:var(--ac);background:#fff}
+.login-err{color:var(--da);font-size:14px;margin-bottom:12px;min-height:20px;font-weight:500}
+.login-btn{width:100%;padding:12px;background:var(--ac);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif}
+.login-btn:hover{background:#5a35e8}
+
+/* 品牌管理 */
+.brand-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1.5px solid var(--sf3)}.brand-row:last-child{border-bottom:none}
+.brand-name-cell{flex:1;font-size:15px;font-weight:600}
+.brand-cat{font-size:13px;color:var(--mu);background:var(--sf2);padding:2px 8px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <h2>&#x1F4E1; &#x8107;&#x52D5;&#x96F7;&#x9054;&#x5F8C;&#x53F0;</h2>
+    <p>台灣消費市場輿情分析系統，僅限管理員使用<br>
+    <small style="color:#bbb">一般使用者請從<a href="index.html" style="color:var(--ac)">脈動雷達</a>登入</small></p>
+    <div class="login-field"><label>帳號</label><input type="text" id="li-user" placeholder="請輸入帳號" autocomplete="username"></div>
+    <div class="login-field"><label>密碼</label><input type="password" id="li-pass" placeholder="請輸入密碼" autocomplete="current-password"></div>
+    <div class="login-err" id="li-err"></div>
+    <button class="login-btn" id="li-btn">登入</button>
+  </div>
+</div>
+
+<div id="app-screen" style="display:none">
+<div class="layout">
+<div class="sidebar">
+  <div class="logo"><h1>&#x1F4E1; &#x8107;&#x52D5;<span>&#x96F7;&#x9054;</span></h1><div class="ver">Admin v1.0 | <span id="logged-user"></span></div></div>
+  <div class="ns"><div class="nl">分析設定</div>
+    <div class="ni active" data-pg="scoring"><span class="ic">&#x1F4CA;</span>評分權重</div>
+    <div class="ni" data-pg="keywords"><span class="ic">&#x1F511;</span>關鍵字規則</div>
+    <div class="ni" data-pg="brands"><span class="ic">&#x1F3E0;</span>品牌管理</div>
+    <div class="ni" data-pg="filters"><span class="ic">&#x1F6AB;</span>過濾設定</div>
+  </div>
+  <div class="ns"><div class="nl">前台設定</div>
+    <div class="ni" data-pg="buttons"><span class="ic">&#x1F39B;&#xFE0F;</span>篩選按鈕</div>
+    <div class="ni" data-pg="display"><span class="ic">&#x1F5A5;&#xFE0F;</span>顯示設定</div>
+    <div class="ni" data-pg="sheets"><span class="ic">&#x1F4C4;</span>資料來源</div>
+  </div>
+  <div class="ns"><div class="nl">系統</div>
+    <div class="ni" data-pg="users"><span class="ic">&#x1F465;</span>使用者管理</div>
+    <div class="ni" data-pg="logs"><span class="ic">&#x1F4CB;</span>登入記錄</div>
+    <div class="ni" data-pg="subscribe"><span class="ic">&#x1F4E7;</span>訂閱管理</div>
+    <div class="ni" data-pg="health"><span class="ic">&#x1F50D;</span>系統健康</div>
+  </div>
+  <div style="padding:16px 20px;border-top:1.5px solid var(--bd);margin-top:auto">
+    <button class="btn btn-d" id="btn-logout" style="width:100%">&#x1F6AA; 登出</button>
+  </div>
+</div>
+<div class="main" id="main"></div>
+</div>
+
+<div class="ab">
+  <div class="ss ok" id="ss">&#x26A1; 設定已載入</div>
+  <div class="br2">
+    <button class="btn btn-d" id="btn-reset">重置預設值</button>
+    <button class="btn btn-s" id="btn-open">開啟前台 &#x2197;</button>
+    <button class="btn btn-p" id="btn-save">&#x1F4BE; 儲存設定</button>
+  </div>
+</div>
+</div>
+
+<div class="tst" id="tst"></div>
+
+<script>
+// ============================================================
+// 認證系統
+// ============================================================
+var UK='pr_users', SK='pr_admin_session', LOGS='pr_logs';
+
+function simpleHash(str){var h=0;for(var i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h=h&h;}return'h'+Math.abs(h).toString(16)+str.length.toString(16);}
+
+function getUsers(){
+  try{var u=localStorage.getItem(UK);if(u)return JSON.parse(u);}catch(e){}
+  return[{username:'admin',pwHash:simpleHash('admin123'),role:'admin',created:'',lastLogin:'',loginCount:0}];
+}
+function saveUsers(u){localStorage.setItem(UK,JSON.stringify(u));}
+function getLogs(){try{var l=localStorage.getItem(LOGS);if(l)return JSON.parse(l);}catch(e){}return[];}
+function addLog(type,user,detail){
+  var logs=getLogs();
+  logs.unshift({type:type,user:user,detail:detail,time:new Date().toLocaleString('zh-TW')});
+  if(logs.length>200)logs=logs.slice(0,200);
+  localStorage.setItem(LOGS,JSON.stringify(logs));
+}
+function getSession(){try{var s=localStorage.getItem(SK);if(s)return JSON.parse(s);}catch(e){}return null;}
+function setSession(u){localStorage.setItem(SK,JSON.stringify({username:u,time:new Date().toISOString()}));}
+function clearSession(){localStorage.removeItem(SK);}
+
+function tryLogin(username,password){
+  var users=getUsers();
+  var user=users.find(function(u){return u.username===username;});
+  if(!user){addLog('fail',username,'帳號不存在');return false;}
+  if(user.pwHash!==simpleHash(password)){addLog('fail',username,'密碼錯誤');return false;}
+  if(user.role!=='admin'){addLog('fail',username,'非管理員帳號');return false;}
+  user.lastLogin=new Date().toLocaleString('zh-TW');user.loginCount=(user.loginCount||0)+1;
+  saveUsers(users);setSession(username);addLog('login',username,'登入成功');
+  return true;
+}
+
+// 更新 users from GitHub
+fetch('https://raw.githubusercontent.com/kellychenichun-glitch/pulse-radar/main/docs/users.json?ts='+Date.now())
+  .then(function(r){return r.json();})
+  .then(function(d){localStorage.setItem(UK,JSON.stringify(d));})
+  .catch(function(){});
+
+// ============================================================
+// 設定管理
+// ============================================================
+var DF={
+  scoring:{pos_review:3,pos_promotion:2,pos_new_product:2,neg_complaint:3,neg_food_safety:4,neg_service:2,neg_recall:4,spread_viral:3,spread_normal:1,cred_media:3,cred_social:2,recency_active:2},
+  thresholds:{S:11,A:9,B:6},
+  signal_pos:['好評','推薦','讚','超值','CP值','划算','好吃','好用','滿意','質感','方便','必買'],
+  signal_neg:['抱怨','差評','退費','黑心','問題','髒亂','食安','過期','客訴','失望','地雷','避雷'],
+  signal_unc:['評測','開箱','比較','心得','分享'],
+  event_promotion:['特賣','促銷','優惠','折扣','買一送一','滿額'],
+  event_new_product:['新品','上市','新口味','新款','限定'],
+  event_complaint:['投訴','客訴','退貨','退款','索賠'],
+  event_food_safety:['食安','過期','異物','黑心','衛生'],
+  brands:['全聯福利中心','統一超商','家樂福','momo購物','蝦皮購物','Costco好市多','大潤發','全家便利商店'],
+  filter_exclude:[],
+  filter_whitelist:[],
+  display:{show_score:true,sort:'level',per_page:100,refresh:30},
+  sheet_id:'',
+  filter_buttons:[
+    {g:'sig',f:'pos',l:'✅ 正面',on:true},{g:'sig',f:'neg',l:'❌ 負面',on:true},{g:'sig',f:'neu',l:'⚪ 中性',on:true},{g:'sig',f:'unc',l:'⚠ 待判讀',on:true},
+    {g:'lev',f:'all',l:'全部',on:true},{g:'lev',f:'S',l:'S 立即',on:true},{g:'lev',f:'A',l:'A 高度',on:true},{g:'lev',f:'B',l:'B 追蹤',on:true},{g:'lev',f:'C',l:'C 存檔',on:false},
+    {g:'src',f:'all',l:'全部',on:true},{g:'src',f:'FB',l:'Facebook',on:true},{g:'src',f:'IG',l:'Instagram',on:true},{g:'src',f:'PTT',l:'PTT',on:true},{g:'src',f:'DCARD',l:'Dcard',on:true},{g:'src',f:'NEWS',l:'新聞媒體',on:true}
+  ]
+};
+
+var C={}, pg='scoring';
+function cl(o){return JSON.parse(JSON.stringify(o));}
+function mg(t,s){for(var k in s){if(!(k in t))t[k]=cl(s[k]);else if(typeof s[k]==='object'&&!Array.isArray(s[k])&&s[k]!==null){if(typeof t[k]!=='object')t[k]={};mg(t[k],s[k]);}}}
+function load(){var sv=localStorage.getItem('prcfg');if(sv){try{C=JSON.parse(sv);mg(C,DF);}catch(e){C=cl(DF);}}else{C=cl(DF);}render();}
+function mkd(){var e=document.getElementById('ss');e.textContent='⚠ 有未儲存的變更';e.className='ss ng';}
+function save(){localStorage.setItem('prcfg',JSON.stringify(C));var e=document.getElementById('ss');e.textContent='✅ 設定已儲存';e.className='ss ok';addLog('save',getSession()?getSession().username:'?','儲存設定');tst('設定已儲存！前台重整後生效');}
+function tst(m){var t=document.getElementById('tst');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function go(p){pg=p;document.querySelectorAll('.ni').forEach(function(n){n.classList.toggle('active',n.dataset.pg===p);});render();}
+
+function sl(k,l,mn,mx){
+  var v=C.scoring[k]!==undefined?C.scoring[k]:0;
+  return '<div class="fld"><label>'+l+'</label><div class="rw"><input type="range" min="'+mn+'" max="'+mx+'" value="'+v+'" data-sk="'+k+'"><span class="rv" id="rv-'+k+'">'+v+'</span></div></div>';
+}
+function kws(ti,de,k,tp){
+  var w=C[k]||[];
+  var tags=w.map(function(x){return '<span class="kt '+tp+'">'+esc(x)+'<span class="kr" data-rk="'+k+'" data-rw="'+esc(x)+'">&#x2715;</span></span>';}).join('');
+  return '<div class="sec"><div class="sh"><div class="st">'+ti+'</div><div class="sd">'+de+'</div></div><div class="sb"><div class="ke"><div class="kl">'+(tags||'<span style="color:var(--mu);font-size:13px">(空)</span>')+'</div><div class="ka"><input type="text" data-ak="'+k+'" placeholder="輸入關鍵字 + Enter"><button data-ab="'+k+'">+新增</button></div></div></div></div>';
+}
+
+function render(){
+  var h='',t=C.thresholds,d=C.display;
+  if(pg==='scoring'){
+    h='<div class="ph"><h2>&#x1F4CA; 評分權重設定</h2><p>調整各因子的分數權重，影響 S/A/B/C 等級判斷</p></div>';
+    h+='<div class="sec"><div class="sh"><div class="st">等級門檻</div></div><div class="sb"><div class="fg3">';
+    h+='<div class="fld"><label>S 級 &ge;</label><input type="number" value="'+t.S+'" min="1" max="20" data-tk="S"></div>';
+    h+='<div class="fld"><label>A 級 &ge;</label><input type="number" value="'+t.A+'" min="1" max="20" data-tk="A"></div>';
+    h+='<div class="fld"><label>B 級 &ge;</label><input type="number" value="'+t.B+'" min="1" max="20" data-tk="B"></div>';
+    h+='</div><div class="scp"><div class="scc"><div class="scv S">S</div><div class="scr">&ge;'+t.S+' 分<br>立即處理</div></div><div class="scc"><div class="scv A">A</div><div class="scr">&ge;'+t.A+' 分<br>高度關注</div></div><div class="scc"><div class="scv B">B</div><div class="scr">&ge;'+t.B+' 分<br>持續追蹤</div></div><div class="scc"><div class="scv C">C</div><div class="scr"><'+t.B+' 分<br>存檔參考</div></div></div></div></div>';
+    h+='<div class="sec"><div class="sh"><div class="st">正面口碑加分</div></div><div class="sb"><div class="fg">'+sl('pos_review','好評/推薦',0,5)+sl('pos_promotion','促銷/優惠',0,4)+sl('pos_new_product','新品上市',0,4)+'</div></div></div>';
+    h+='<div class="sec"><div class="sh"><div class="st">負面輿情加分（越高代表越優先處理）</div></div><div class="sb"><div class="fg">'+sl('neg_food_safety','食安/黑心問題',0,5)+sl('neg_recall','下架/回收',0,5)+sl('neg_complaint','客訴/退費',0,4)+sl('neg_service','服務問題',0,3)+'</div></div></div>';
+    h+='<div class="sec"><div class="sh"><div class="st">擴散性/來源</div></div><div class="sb"><div class="fg">'+sl('spread_viral','病毒式擴散',0,5)+sl('spread_normal','正常傳播',0,2)+sl('cred_media','主流媒體',0,5)+sl('cred_social','社群/KOL',0,3)+sl('recency_active','24hr內活躍',0,3)+'</div></div></div>';
+  } else if(pg==='keywords'){
+    h='<div class="ph"><h2>&#x1F511; 關鍵字規則</h2><p>設定判斷訊號傾向、事件類型的關鍵字</p></div>';
+    h+=kws('正面口碑關鍵字','出現這些詞 → 判斷為正面','signal_pos','pos');
+    h+=kws('負面輿情關鍵字','出現這些詞 → 判斷為負面','signal_neg','neg');
+    h+=kws('待判讀關鍵字','出現這些詞 → 需人工確認','signal_unc','evt');
+    h+='<div style="height:1px;background:var(--bd);margin:16px 0"></div>';
+    h+=kws('促銷活動關鍵字','','event_promotion','pos');
+    h+=kws('新品上市關鍵字','','event_new_product','pos');
+    h+=kws('客訴/投訴關鍵字','','event_complaint','neg');
+    h+=kws('食安問題關鍵字','','event_food_safety','neg');
+  } else if(pg==='brands'){
+    var blist=C.brands||[];
+    var brows=blist.map(function(b,i){
+      return '<div class="brand-row"><span class="brand-name-cell">'+esc(b)+'</span><span class="brand-cat">消費品牌</span><button class="btn btn-d" style="padding:5px 10px;font-size:13px" data-delbrand="'+i+'">移除</button></div>';
+    }).join('');
+    h='<div class="ph"><h2>&#x1F3E0; 品牌管理</h2><p>管理監控的品牌清單</p></div>';
+    h+='<div class="sec"><div class="sh"><div class="st">監控品牌清單（'+blist.length+' 個）</div></div><div class="sb">'+(brows||'<p style="color:var(--mu)">尚無品牌</p>')+'</div></div>';
+    h+='<div class="sec"><div class="sh"><div class="st">新增品牌</div></div><div class="sb"><div class="fg" style="align-items:flex-end"><div class="fld"><label>品牌名稱</label><input type="text" id="new-brand" placeholder="例：台積電、星巴克..."></div><button class="btn btn-p" id="add-brand" style="height:42px">+ 新增</button></div></div></div>';
+  } else if(pg==='filters'){
+    h='<div class="ph"><h2>&#x1F6AB; 過濾設定</h2><p>設定排除詞與白名單</p></div>';
+    h+=kws('排除關鍵字','標題含這些詞 → 不顯示','filter_exclude','neg');
+    h+=kws('白名單關鍵字','帳號或標題含這些詞 → 無條件保留','filter_whitelist','pos');
+  } else if(pg==='buttons'){
+    var grp={sig:[],lev:[],src:[]},gn={sig:'情緒傾向',lev:'重要等級',src:'來源平台'};
+    C.filter_buttons.forEach(function(b,i){if(grp[b.g])grp[b.g].push({b:b,i:i});});
+    h='<div class="ph"><h2>&#x1F39B;&#xFE0F; 篩選按鈕設定</h2><p>調整前台篩選按鈕標籤與啟用狀態</p></div>';
+    for(var g in grp){
+      h+='<div class="sec"><div class="sh"><div class="st">'+gn[g]+' 群組</div></div><div class="sb"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px">';
+      grp[g].forEach(function(x){
+        var chk=x.b.on?' checked':'';
+        h+='<div style="background:var(--sf2);border:1.5px solid var(--bd);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-family:DM Mono,monospace;color:var(--mu)">'+x.b.f+'</span><label class="tog"><input type="checkbox" data-bi="'+x.i+'"'+chk+'><span class="tgs"></span></label></div><input type="text" value="'+esc(x.b.l)+'" data-bl="'+x.i+'" style="background:#fff;border:1.5px solid var(--bd);border-radius:5px;padding:5px 9px;font-size:14px;width:100%;outline:none"></div>';
+      });
+      h+='</div></div></div>';
+    }
+  } else if(pg==='display'){
+    var so=['level','time','score'].map(function(sv){return '<option value="'+sv+'"'+(d.sort===sv?' selected':'')+'>'+{level:'重要等級',time:'最新時間',score:'分數'}[sv]+'</option>';}).join('');
+    var chkSc=d.show_score?' checked':'';
+    h='<div class="ph"><h2>&#x1F5A5;&#xFE0F; 顯示設定</h2><p>調整前台的顯示行為與預設值</p></div><div class="sec"><div class="sh"><div class="st">顯示行為</div></div><div class="sb">';
+    h+='<div class="tr"><div class="tl">顯示分數數字</div><label class="tog"><input type="checkbox" data-dc="show_score"'+chkSc+'><span class="tgs"></span></label></div>';
+    h+='<div style="height:1px;background:var(--bd);margin:14px 0"></div><div class="fg"><div class="fld"><label>預設排序</label><select data-dc="sort">'+so+'</select></div><div class="fld"><label>每頁筆數</label><input type="number" value="'+d.per_page+'" min="10" max="500" data-dc="per_page"></div><div class="fld"><label>自動更新（秒）</label><input type="number" value="'+d.refresh+'" min="10" max="3600" data-dc="refresh"></div></div></div></div>';
+  } else if(pg==='sheets'){
+    h='<div class="ph"><h2>&#x1F4C4; 資料來源設定</h2><p>設定 Google Sheets 資料來源</p></div>';
+    h+='<div class="sec"><div class="sh"><div class="st">Google Sheets ID</div><div class="sd">從 Sheets 網址中取得 ID（d/ 和 /edit 之間的字串）</div></div><div class="sb"><div class="fld"><label>Sheets ID</label><input type="text" id="sheet-id" value="'+esc(C.sheet_id||'')+'" placeholder="1rKfbDPg..."></div><button class="btn btn-s" id="test-sheet" style="margin-top:12px">測試連線</button><div id="sheet-result" style="font-size:13px;margin-top:10px;color:var(--mu)"></div></div></div>';
+  } else if(pg==='users'){
+    var users=getUsers();
+    var sess=getSession();
+    var rows=users.map(function(u,i){
+      var isMe=sess&&u.username===sess.username;
+      return '<div class="user-row"><span class="user-name">'+esc(u.username)+(isMe?' <span style="color:var(--ac);font-size:12px">(我)</span>':'')+'</span><span class="user-role">'+u.role+'</span><span style="font-size:13px;color:var(--mu);font-family:DM Mono,monospace;min-width:160px">上次：'+(u.lastLogin||'從未')+'</span><button class="btn btn-s" style="padding:5px 12px;font-size:13px" data-changepw="'+i+'">改密碼</button>'+(u.role!=='admin'?'<button class="btn btn-d" style="padding:5px 12px;font-size:13px" data-deluser="'+i+'">刪除</button>':'')+'</div>';
+    }).join('');
+    h='<div class="ph"><h2>&#x1F465; 使用者管理</h2><p>新增/刪除使用者、修改密碼</p></div>';
+    h+='<div class="sec"><div class="sh"><div class="st">使用者列表</div></div><div class="sb">'+(rows||'<p>無使用者</p>')+'</div></div>';
+    h+='<div class="sec"><div class="sh"><div class="st">新增使用者</div></div><div class="sb"><div class="fg"><div class="fld"><label>帳號</label><input type="text" id="nu-user" placeholder="username"></div><div class="fld"><label>密碼</label><input type="password" id="nu-pass" placeholder="至少6位"></div><div class="fld"><label>角色</label><select id="nu-role"><option value="admin">admin</option><option value="viewer" selected>viewer</option></select></div></div><button class="btn btn-g" id="nu-add" style="margin-top:14px">+ 新增使用者</button></div></div>';
+  } else if(pg==='logs'){
+    var logs=getLogs();
+    var lrows=logs.slice(0,100).map(function(l){
+      var badge={login:'badge-login',fail:'badge-fail',save:'badge-save',user:'badge-user'}[l.type]||'badge-login';
+      var label={login:'登入',fail:'失敗',save:'儲存',user:'使用者'}[l.type]||l.type;
+      return '<tr><td>'+esc(l.time)+'</td><td><span class="badge '+badge+'">'+label+'</span></td><td><strong>'+esc(l.user)+'</strong></td><td>'+esc(l.detail)+'</td></tr>';
+    }).join('');
+    h='<div class="ph"><h2>&#x1F4CB; 登入記錄</h2><p>登入、儲存、使用者變更的操作記錄</p></div><div class="sec"><div class="sh"><div class="st">近期記錄</div></div><div class="sb" style="overflow-x:auto"><table class="log-table"><thead><tr><th>時間</th><th>類型</th><th>使用者</th><th>詳情</th></tr></thead><tbody>'+(lrows||'<tr><td colspan="4" style="text-align:center;color:var(--mu)">尚無記錄</td></tr>')+'</tbody></table></div></div><div style="margin-top:12px"><button class="btn btn-d" id="clr-logs">清除所有記錄</button></div>';
+  } else if(pg==='subscribe'){
+    var notifyRaw=localStorage.getItem('pr_notify');
+    var notify=notifyRaw?JSON.parse(notifyRaw):{subscribers:[],schedule:{mode:'daily',daily_hour:8,interval_hours:6,enabled:true}};
+    var subs=notify.subscribers||[];
+    var subRows=subs.map(function(s,i){
+      return '<div class="user-row"><span class="user-name" style="font-family:DM Mono,monospace">'+esc(s.email)+'</span><span class="user-role">'+(s.enabled?'訂閱中':'已停用')+'</span><button class="btn btn-s" style="padding:5px 10px;font-size:13px" data-togsub="'+i+'">'+(s.enabled?'暫停':'開啟')+'</button><button class="btn btn-d" style="padding:5px 10px;font-size:13px" data-delsub="'+i+'">取消訂閱</button></div>';
+    }).join('');
+    h='<div class="ph"><h2>&#x1F4E7; 訂閱管理</h2><p>管理消費市場日報的收件人與發送頻率</p></div>';
+    h+='<div class="sec"><div class="sh"><div class="st">訂閱者列表（'+subs.length+' 位）</div></div><div class="sb">'+(subRows||'<p style="color:var(--mu)">尚無訂閱者</p>')+'</div></div>';
+    h+='<div class="sec"><div class="sh"><div class="st">新增訂閱</div></div><div class="sb"><div class="fg" style="align-items:flex-end"><div class="fld"><label>Email 地址</label><input type="email" id="new-sub-email" placeholder="example@email.com"></div><button class="btn btn-p" id="add-sub-btn" style="height:42px">新增訂閱</button></div></div></div>';
+    var sc=notify.schedule||{};
+    var modeOpts=['daily','interval'].map(function(m){var l={daily:'每日定時',interval:'間隔小時'}[m];return '<option value="'+m+'"'+(sc.mode===m?' selected':'')+'>'+l+'</option>';}).join('');
+    h+='<div class="sec"><div class="sh"><div class="st">發送頻率</div></div><div class="sb"><div class="fg3"><div class="fld"><label>模式</label><select id="sc-mode">'+modeOpts+'</select></div><div class="fld"><label>每日發送時間（小時）</label><input type="number" id="sc-hour" value="'+(sc.daily_hour||8)+'" min="0" max="23"></div><div class="fld"><label>間隔小時數</label><input type="number" id="sc-int" value="'+(sc.interval_hours||6)+'" min="1" max="24"></div></div><div class="tr" style="margin-top:14px"><div class="tl">啟用訂閱通知</div><label class="tog"><input type="checkbox" id="sc-enabled"'+(sc.enabled?' checked':'')+'><span class="tgs"></span></label></div><button class="btn btn-p" id="save-notify" style="margin-top:16px">&#x1F4BE; 儲存訂閱設定</button></div></div>';
+  } else if(pg==='health'){
+    h='<div class="ph"><h2>&#x1F50D; 系統健康</h2><p>檢查資料來源、Sheets 狀態</p></div><div class="sec"><div class="sh"><div class="st">快速診斷</div></div><div class="sb"><div class="br2" style="margin-bottom:14px"><button class="btn btn-s" id="hcs">檢查 Sheets</button><button class="btn btn-s" id="hct">檢查今日資料</button><button class="btn btn-s" id="hof">開啟前台</button></div><div style="background:var(--sf2);border:1.5px solid var(--bd);border-radius:8px;padding:14px;font-family:DM Mono,monospace;font-size:13px;min-height:80px" id="hlog">點擊上方按鈕開始診斷...</div></div></div>';
+  }
+  document.getElementById('main').innerHTML=h;
+  bind();
+}
+
+function addKw(k,inp){var v=inp.value.trim();if(!v)return;if(!C[k])C[k]=[];if(C[k].indexOf(v)===-1){C[k].push(v);mkd();render();}inp.value='';}
+
+function bind(){
+  document.querySelectorAll('input[data-sk]').forEach(function(e){e.addEventListener('input',function(){C.scoring[this.dataset.sk]=parseFloat(this.value);var r=document.getElementById('rv-'+this.dataset.sk);if(r)r.textContent=this.value;mkd();});});
+  document.querySelectorAll('input[data-tk]').forEach(function(e){e.addEventListener('change',function(){C.thresholds[this.dataset.tk]=parseInt(this.value);mkd();render();});});
+  document.querySelectorAll('.kr').forEach(function(e){e.addEventListener('click',function(){var k=this.dataset.rk,w=this.dataset.rw,a=C[k];if(!a)return;var i=a.indexOf(w);if(i>-1){a.splice(i,1);mkd();render();}});});
+  document.querySelectorAll('input[data-ak]').forEach(function(e){e.addEventListener('keydown',function(ev){if(ev.key==='Enter')addKw(this.dataset.ak,this);});});
+  document.querySelectorAll('button[data-ab]').forEach(function(e){e.addEventListener('click',function(){var k=this.dataset.ab,i=document.querySelector('input[data-ak="'+k+'"]');if(i)addKw(k,i);});});
+  document.querySelectorAll('input[data-bi]').forEach(function(e){e.addEventListener('change',function(){C.filter_buttons[parseInt(this.dataset.bi)].on=this.checked;mkd();});});
+  document.querySelectorAll('input[data-bl]').forEach(function(e){e.addEventListener('change',function(){C.filter_buttons[parseInt(this.dataset.bl)].l=this.value;mkd();});});
+  document.querySelectorAll('[data-dc]').forEach(function(e){e.addEventListener('change',function(){var k=this.dataset.dc;if(this.type==='checkbox')C.display[k]=this.checked;else if(this.type==='number')C.display[k]=parseInt(this.value);else C.display[k]=this.value;mkd();});});
+  var hcs=document.getElementById('hcs');if(hcs)hcs.addEventListener('click',checkSheets);
+  var hct=document.getElementById('hct');if(hct)hct.addEventListener('click',checkToday);
+  var hof=document.getElementById('hof');if(hof)hof.addEventListener('click',function(){window.open('index.html','_blank');});
+  var clrl=document.getElementById('clr-logs');if(clrl)clrl.addEventListener('click',function(){if(confirm('確定要清除所有記錄？')){localStorage.removeItem(LOGS);render();tst('記錄已清除');}});
+  var nadd=document.getElementById('nu-add');
+  if(nadd)nadd.addEventListener('click',function(){var u=document.getElementById('nu-user').value.trim(),p=document.getElementById('nu-pass').value.trim(),r=document.getElementById('nu-role').value;if(!u||!p){alert('帳號和密碼不能為空');return;}if(p.length<6){alert('密碼至少6位');return;}var users=getUsers();if(users.find(function(x){return x.username===u;})){alert('帳號已存在');return;}users.push({username:u,pwHash:simpleHash(p),role:r,created:new Date().toLocaleString('zh-TW'),lastLogin:'',loginCount:0});saveUsers(users);addLog('user',getSession().username,'新增使用者: '+u);render();tst('使用者 '+u+' 已新增！');});
+  document.querySelectorAll('[data-changepw]').forEach(function(e){e.addEventListener('click',function(){var idx=parseInt(this.dataset.changepw),users=getUsers(),u=users[idx];var np=prompt('請輸入 '+u.username+' 的新密碼（至少6位）：');if(!np)return;if(np.length<6){alert('密碼至少6位');return;}users[idx].pwHash=simpleHash(np);saveUsers(users);addLog('user',getSession().username,'修改密碼: '+u.username);tst('密碼已更新！');});});
+  document.querySelectorAll('[data-deluser]').forEach(function(e){e.addEventListener('click',function(){var idx=parseInt(this.dataset.deluser),users=getUsers(),u=users[idx];if(!confirm('確定要刪除使用者 '+u.username+' ？'))return;users.splice(idx,1);saveUsers(users);addLog('user',getSession().username,'刪除使用者: '+u.username);render();tst('使用者已刪除！');});});
+  // 品牌管理
+  var abrand=document.getElementById('add-brand');
+  if(abrand)abrand.addEventListener('click',function(){var v=document.getElementById('new-brand').value.trim();if(!v)return;if(!C.brands)C.brands=[];if(C.brands.indexOf(v)===-1){C.brands.push(v);mkd();render();tst(v+' 已加入監控！')}});
+  document.querySelectorAll('[data-delbrand]').forEach(function(e){e.addEventListener('click',function(){var idx=parseInt(this.dataset.delbrand);C.brands.splice(idx,1);mkd();render();});});
+  // 訂閱管理
+  var addSubBtn=document.getElementById('add-sub-btn');
+  if(addSubBtn)addSubBtn.addEventListener('click',function(){
+    var email=document.getElementById('new-sub-email').value.trim();
+    if(!email||email.indexOf('@')<0){alert('請輸入正確的 Email');return;}
+    var notifyRaw=localStorage.getItem('pr_notify');
+    var notify=notifyRaw?JSON.parse(notifyRaw):{subscribers:[],schedule:{mode:'daily',daily_hour:8,interval_hours:6,enabled:true}};
+    if(notify.subscribers.find(function(s){return s.email===email;})){alert('Email 已存在');return;}
+    notify.subscribers.push({email:email,enabled:true,created:new Date().toISOString().split('T')[0]});
+    localStorage.setItem('pr_notify',JSON.stringify(notify));
+    render();tst(email+' 已加入訂閱！');
+  });
+  document.querySelectorAll('[data-togsub]').forEach(function(e){e.addEventListener('click',function(){var idx=parseInt(this.dataset.togsub),n=JSON.parse(localStorage.getItem('pr_notify')||'{}');n.subscribers[idx].enabled=!n.subscribers[idx].enabled;localStorage.setItem('pr_notify',JSON.stringify(n));render();});});
+  document.querySelectorAll('[data-delsub]').forEach(function(e){e.addEventListener('click',function(){var idx=parseInt(this.dataset.delsub),n=JSON.parse(localStorage.getItem('pr_notify')||'{}');if(!confirm('確定要取消 '+n.subscribers[idx].email+' 的訂閱？'))return;n.subscribers.splice(idx,1);localStorage.setItem('pr_notify',JSON.stringify(n));render();tst('已取消訂閱');});});
+  var saveNotify=document.getElementById('save-notify');
+  if(saveNotify)saveNotify.addEventListener('click',function(){
+    var n=JSON.parse(localStorage.getItem('pr_notify')||'{"subscribers":[],"schedule":{}}');
+    n.schedule={mode:document.getElementById('sc-mode').value,daily_hour:parseInt(document.getElementById('sc-hour').value)||8,interval_hours:parseInt(document.getElementById('sc-int').value)||6,enabled:document.getElementById('sc-enabled').checked};
+    localStorage.setItem('pr_notify',JSON.stringify(n));tst('訂閱設定已儲存！');
+  });
+  // Sheets ID
+  var sid=document.getElementById('sheet-id');
+  if(sid)sid.addEventListener('change',function(){C.sheet_id=this.value.trim();mkd();});
+  var testSheet=document.getElementById('test-sheet');
+  if(testSheet)testSheet.addEventListener('click',function(){
+    var id=document.getElementById('sheet-id').value.trim();
+    if(!id){document.getElementById('sheet-result').textContent='請先填入 Sheets ID';return;}
+    document.getElementById('sheet-result').textContent='測試中...';
+    var td=new Date().toISOString().split('T')[0];
+    fetch('https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&sheet='+td+'&ts='+Date.now())
+      .then(function(r){return r.text();})
+      .then(function(t){var s=t.indexOf('{'),e=t.lastIndexOf('}');var j=JSON.parse(t.substring(s,e+1));document.getElementById('sheet-result').innerHTML='<span style="color:var(--gr)">✅ 連線成功！今日資料：'+(j.table?j.table.rows.length:0)+' 筆</span>';})
+      .catch(function(e){document.getElementById('sheet-result').innerHTML='<span style="color:var(--da)">❌ 連線失敗：'+e.message+'</span>';});
+  });
+}
+
+function checkSheets(){
+  var l=document.getElementById('hlog');l.textContent='檢查中...';
+  var id=C.sheet_id;if(!id){l.textContent='⚠️ 尚未設定 Sheets ID，請先至「資料來源」設定';return;}
+  var td=new Date().toISOString().split('T')[0];
+  fetch('https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&sheet='+td+'&ts='+Date.now())
+    .then(function(r){return r.text();})
+    .then(function(t){var s=t.indexOf('{'),e=t.lastIndexOf('}'),j=JSON.parse(t.substring(s,e+1));l.textContent='✅ Sheets 連線正常\n今日('+td+')資料：'+(j.table?j.table.rows.length:0)+'\n檢查時間：'+new Date().toLocaleString('zh-TW');})
+    .catch(function(e){l.textContent='❌ 失敗：'+e.message;});
+}
+function checkToday(){
+  var l=document.getElementById('hlog');l.textContent='抓取中...';
+  l.textContent='✅ 系統運作正常\nSheets ID：'+(C.sheet_id||'（未設定）')+'\n品牌監控數：'+(C.brands||[]).length+'\n訂閱者：'+(JSON.parse(localStorage.getItem('pr_notify')||'{"subscribers":[]}').subscribers.length)+'位\n檢查時間：'+new Date().toLocaleString('zh-TW');
+}
+
+// 登入邏輯
+document.getElementById('li-btn').addEventListener('click',function(){
+  var u=document.getElementById('li-user').value.trim(),p=document.getElementById('li-pass').value,err=document.getElementById('li-err');
+  if(!u||!p){err.textContent='請輸入帳號和密碼';return;}
+  if(tryLogin(u,p)){err.textContent='';document.getElementById('login-screen').style.display='none';document.getElementById('app-screen').style.display='block';document.getElementById('logged-user').textContent=u;load();}
+  else{err.textContent='帳號或密碼錯誤，請重試';document.getElementById('li-pass').value='';}
+});
+document.getElementById('li-pass').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('li-btn').click();});
+document.getElementById('li-user').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('li-pass').focus();});
+document.querySelectorAll('.ni').forEach(function(n){n.addEventListener('click',function(){go(this.dataset.pg);});});
+document.getElementById('btn-save').addEventListener('click',save);
+document.getElementById('btn-reset').addEventListener('click',function(){if(!confirm('確定要重置所有設定為預設值？'))return;C=cl(DF);mkd();render();tst('已重置為預設值');});
+document.getElementById('btn-open').addEventListener('click',function(){window.open('index.html','_blank');});
+document.getElementById('btn-logout').addEventListener('click',function(){if(!confirm('確定要登出？'))return;addLog('login',getSession()?getSession().username:'?','登出');clearSession();document.getElementById('login-screen').style.display='flex';document.getElementById('app-screen').style.display='none';});
+
+var sess=getSession();
+if(sess){document.getElementById('login-screen').style.display='none';document.getElementById('app-screen').style.display='block';document.getElementById('logged-user').textContent=sess.username;load();}
+</script>
+</body>
+</html>
